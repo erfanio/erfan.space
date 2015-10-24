@@ -3,13 +3,52 @@
 <head>
   <title>Erfan In Space</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      height:100%;
+    }
+
     body {
       background-image: url('bg.jpg');
       background-size: cover;
     }
+
+    #space {
+      position:absolute;
+      width:100%;
+      height:100%;
+    }
+
+    #erfan {
+      width: 50px;
+      height: 50px;
+      display: none;
+    }
   </style>
+  <script type="text/javascript" src="paper.js"></script>
+  <script type="text/paperscript" canvas="space">
+    var erfan = new Raster('erfan');
+    erfan.position = view.center;
+    var destination = Point.random() * view.size;
+
+    function onFrame(event) {
+    	var vector = destination - erfan.position;
+    	erfan.position += vector / 30;
+      erfan.rotate(vector.length/10);
+    	if (vector.length < 5) {
+    		destination = Point.random() * view.size;
+    	}
+    }
+  </script>
 </head>
 <body>
-  <img src="erfan.png">
-</body>
+  <img src="erfan.png" id="erfan" />
+
+  <canvas id="space"></canvas>
+
+  </body>
 </html>
