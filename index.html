@@ -27,17 +27,36 @@
 
     <script type="text/javascript" src="paper-full.min.js"></script>
     <script type="text/paperscript" canvas="space">
-      var astronaut = new Raster('astronaut.png');
-      astronaut.position = view.center;
-      var destination = Point.random() * view.size;
+      var destination, velocity, initialDistance;
+      var velocityUnit = 0.0005;
+      var astronaut = new Raster({
+        source: 'astronaut.png',
+        position: view.center,
+      });
+
+      function newDestination() {
+        destination = Point.random() * view.size;
+        velocity = velocityUnit;
+        initialDistance = (destination - astronaut.position).length;
+      }
+      newDestination();
 
       function onFrame(event) {
         var vector = destination - astronaut.position;
-        astronaut.position += vector / 500;
-        astronaut.rotate(vector.length / 1000);
+        var distance = vector.length;
 
-        if (vector.length < 50) {
-          destination = Point.random() * view.size;
+        if (distance < 20) {
+          newDestination();
+        }
+
+        astronaut.position += (vector / distance * velocity);
+        astronaut.rotate(velocity / 10);
+
+        // first half speed up, second half slow down
+        if (distance > initialDistance/2) {
+          velocity += velocityUnit;
+        } else {
+          velocity -= velocityUnit;
         }
       }
     </script>
