@@ -45,6 +45,14 @@
       ufo.onLoad = function() {
         ufo.scale(100 / ufo.size.width);
       }
+      var distanceText = new PointText({
+        point: [10, 30],
+        content: 'Click to spawn UFO!',
+        justification: 'left',
+        fillColor: 'white',
+        fontFamily: 'Sans Serif',
+        fontSize: 20,
+      });
 
       function newDestination(location) {
         if (location) {
