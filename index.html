@@ -15,7 +15,7 @@
     body {
       background-image: url('background.jpg');
       background-size: cover;
-      background-position: bottom;
+      background-position: center;
     }
 
     #space {
@@ -27,38 +27,71 @@
 
     <script type="text/javascript" src="paper-full.min.js"></script>
     <script type="text/paperscript" canvas="space">
-      var destination, velocity, initialDistance;
-      var velocityUnit = 0.0005;
+      var destination, initialDistance;
+      var velocityUnit = 0.05;
+      var velocity = new Point();
       var astronaut = new Raster({
         source: 'astronaut.png',
         position: view.center,
       });
+      astronaut.onLoad = function() {
+        astronaut.scale(100 / astronaut.size.height);
+      }
+      var ufo = new Raster({
+        source: 'ufo.png',
+        position: view.center,
+        opacity: 0,
+      });
+      ufo.onLoad = function() {
+        ufo.scale(100 / ufo.size.width);
+      }
 
-      function newDestination() {
-        destination = Point.random() * view.size;
-        velocity = velocityUnit;
+      function newDestination(location) {
+        if (location) {
+          destination = location;
+        } else {
+          destination = Point.random() * view.size;
+        }
+        ufo.position = destination;
+        ufo.opacity = 1;
         initialDistance = (destination - astronaut.position).length;
       }
-      newDestination();
 
       function onFrame(event) {
         var vector = destination - astronaut.position;
         var distance = vector.length;
 
-        if (distance < 20) {
+        if (distance < 100) {
+          ufo.opacity = 0;
+        }
+        if (distance < 50) {
           newDestination();
         }
 
-        astronaut.position += (vector / distance * velocity);
-        astronaut.rotate(velocity / 10);
+        astronaut.position += velocity;
+        astronaut.rotate(velocity.length / 10);
 
         // first half speed up, second half slow down
+        var acceleration;
         if (distance > initialDistance/2) {
-          velocity += velocityUnit;
+          var idealVelocity = vector / distance * (velocity.length + velocityUnit);
+          acceleration = idealVelocity - velocity;
         } else {
-          velocity -= velocityUnit;
+          // we never let velocity reach 0 so astronaut can always reach the destination
+          // not freeze in the middle of the screen
+          var idealVelocity = vector / distance * Math.max(velocity.length - velocityUnit, 0.5);
+          acceleration = idealVelocity - velocity;
         }
+
+        // create a unit vector in acceleration direction and apply acceleration
+        velocity += acceleration / acceleration.length * velocityUnit;
       }
+
+      tool.onMouseDown = function(event) {
+        newDestination(event.point);
+      }
+
+      newDestination();
     </script>
   </head>
   <body>
